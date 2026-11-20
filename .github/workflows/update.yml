@@ -1,0 +1,44 @@
+name: Update HTTP Proxy List
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch and update proxies
+        run: |
+          curl -s "https://api.proxyscrape.com/v3/free-proxy-list/get?request=displayproxies&protocol=http&proxy_format=ipport&format=text&timeout=10000" > all.txt
+          curl -s "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/http/data.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/r00tee/Proxy-List/main/Https.txt" >> all.txt
+          curl -s "https://proxyspace.pro/http.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/SoliSpirit/proxy-list/main/https.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/ObcbO/getproxy/master/file/http.txt" >> all.txt
+          curl -s "https://www.flashproxy.com/api/proxies/txt?protocol=http&limit=1000" >> all.txt
+          curl -s "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/proxygenerator1/ProxyGenerator/refs/heads/main/Stable/https.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/http.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/VPSLabCloud/VPSLab-Free-Proxy-List/refs/heads/main/http_all.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/SevenworksDev/proxy-list/refs/heads/main/proxies/https.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/iplocate/free-proxy-list/refs/heads/main/protocols/http.txt" >> all.txt
+          curl -s "https://raw.githubusercontent.com/proxygenerator1/ProxyGenerator/refs/heads/main/Unstable/http.txt" >> all.txt
+          sort -u all.txt -o all.txt
+          
+
+      - name: Commit and push updated file
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          date -u > timestamp.txt
+          git add all.txt timestamp.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update HTTP proxy list and keepalive timestamp" && git push)
